@@ -1,5 +1,6 @@
 package com.turkcell.spring.into.services.concretes;
 
+import com.turkcell.spring.into.core.utils.exceptions.types.BusinessException;
 import com.turkcell.spring.into.dtos.requests.AddCategoryRequest;
 import com.turkcell.spring.into.dtos.responses.AddCategoryResponse;
 import com.turkcell.spring.into.entities.Category;
@@ -10,6 +11,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
@@ -19,14 +21,13 @@ public class CategoryServiceImpl implements CategoryService {
 
     @Override
     public AddCategoryResponse add(AddCategoryRequest dto) {
-        if(dto.getCategoryName().length()<3)
-            throw new RuntimeException("kategori ismi 3 haneden küçük olamaz");
+        categoryWithSameNameShouldNotExist(dto.getCategoryName());
 
         Category category = CategoryMapper.INSTANCE.categoryFromRequest(dto);
 
         Category savedCategory =  categoryRepository.save(category);
-        AddCategoryResponse response = new AddCategoryResponse(savedCategory.getId(), savedCategory.getName());
-        return response;
+
+        return new AddCategoryResponse(savedCategory.getId(), savedCategory.getName());
     }
 
     @Override
@@ -55,5 +56,14 @@ public class CategoryServiceImpl implements CategoryService {
     @Override
     public Category getById(int id) {
         return categoryRepository.findById(id).orElseThrow();
+    }
+
+
+    private void categoryWithSameNameShouldNotExist(String name){
+        Optional<Category> categoryWithSameName = categoryRepository.findByNameIgnoreCase(name);
+        if(categoryWithSameName.isPresent())
+        {
+            throw new BusinessException("Aynı isimli 2. kategori eklenemez");
+        }
     }
 }

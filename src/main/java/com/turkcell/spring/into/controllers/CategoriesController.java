@@ -4,6 +4,7 @@ import com.turkcell.spring.into.dtos.requests.AddCategoryRequest;
 import com.turkcell.spring.into.dtos.responses.AddCategoryResponse;
 import com.turkcell.spring.into.entities.Category;
 import com.turkcell.spring.into.services.abstracts.CategoryService;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -26,7 +27,7 @@ public class CategoriesController {
     }
 
     @PostMapping
-    public ResponseEntity<AddCategoryResponse> add(@RequestBody AddCategoryRequest dto) {
+    public ResponseEntity<AddCategoryResponse> add(@RequestBody @Valid AddCategoryRequest dto) {
 
         AddCategoryResponse response = categoryService.add(dto);
         URI location = ServletUriComponentsBuilder.fromCurrentRequest().path("/{id}").buildAndExpand(response.getId()).toUri();
